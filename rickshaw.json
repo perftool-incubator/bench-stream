@@ -1,0 +1,23 @@
+{
+  "rickshaw-benchmark": {
+    "schema": {
+      "version": "2020.05.18"
+    }
+  },
+  "benchmark": "stream",
+  "controller": {
+    "post-script": "%bench-dir%stream-post-process.py"
+  },
+  "client": {
+    "files-from-controller": [
+      { "src": "%bench-dir%/stream-base", "dest": "/usr/bin/" },
+      { "src": "%bench-dir%/stream_common.py", "dest": "/usr/bin/" },
+      { "src": "%bench-dir%/stream-client.py", "dest": "/usr/bin/" },
+      { "src": "%bench-dir%/stream-post-process.py", "dest": "/usr/bin/" },
+      { "src": "%bench-dir%/stream-get-runtime", "dest": "/usr/bin/" },
+      { "src": "%bench-dir%/stream-client", "dest": "/usr/bin/" }
+    ],
+    "runtime": "stream-get-runtime",
+    "start": "stream-client"
+  }
+}

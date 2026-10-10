@@ -1,0 +1,74 @@
+{
+  "workshop": {
+    "schema": {
+      "version": "2020.03.02"
+    }
+  },
+  "userenvs": [
+    {
+      "name": "alma9",
+      "requirements": [
+        "stream_build_tools",
+        "stream_build_driver",
+        "stream_upstream"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "stream_build_tools",
+      "type": "distro",
+      "distro_info": {
+        "packages": [
+          "gcc",
+          "numactl",
+          "python3",
+          "tar"
+        ]
+      }
+    },
+    {
+      "name": "stream_build_driver",
+      "type": "files",
+      "files_info": {
+        "files": [
+          {
+            "src": "%bench-dir%/stream-build.py",
+            "dst": "/tmp/stream-build.py"
+          },
+          {
+            "src": "%bench-dir%/stream_common.py",
+            "dst": "/tmp/stream_common.py"
+          },
+          {
+            "src": "%bench-dir%/third-party/STREAM-5.10-LICENSE.txt",
+            "dst": "/tmp/STREAM-5.10-LICENSE.txt"
+          },
+          {
+            "src": "%bench-dir%/third-party/NOTICE.txt",
+            "dst": "/tmp/STREAM-NOTICE.txt"
+          },
+          {
+            "src": "%bench-dir%/LICENSE",
+            "dst": "/tmp/STREAM-ADAPTER-LICENSE.txt"
+          }
+        ]
+      }
+    },
+    {
+      "name": "stream_upstream",
+      "type": "source",
+      "source_info": {
+        "url": "https://github.com/redhat-performance/streams-wrapper/archive/8932e7bfa6cf1c99360c10549887eeb1d457d27e.tar.gz",
+        "filename": "streams-wrapper-8932e7bfa6cf1c99360c10549887eeb1d457d27e.tar.gz",
+        "commands": {
+          "unpack": "tar -xzf streams-wrapper-8932e7bfa6cf1c99360c10549887eeb1d457d27e.tar.gz",
+          "get_dir": "echo streams-wrapper-8932e7bfa6cf1c99360c10549887eeb1d457d27e",
+          "commands": [
+            "python3 /tmp/stream-build.py --source-file streams/stream_omp_5_10.c --license-file /tmp/STREAM-5.10-LICENSE.txt --notice-file /tmp/STREAM-NOTICE.txt --adapter-license-file /tmp/STREAM-ADAPTER-LICENSE.txt"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "tags": {
+    "description": "stream-remotehosts-run-file-example"
+  },
+  "endpoints": [
+    {
+      "type": "remotehosts",
+      "settings": {
+        "user": "REPLACE_WITH_ENGINE_USER",
+        "controller-ip-address": "192.0.2.1"
+      },
+      "remotes": [
+        {
+          "engines": [
+            { "role": "client", "ids": [1] }
+          ],
+          "config": {
+            "host": "stream-client.example.invalid",
+            "settings": {
+              "userenv": "alma9",
+              "osruntime": "podman",
+              "cpu-partitioning": false
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "benchmarks": [
+    {
+      "name": "stream",
+      "ids": "1",
+      "mv-params": {
+        "sets": [
+          {
+            "params": [
+              { "arg": "test-type", "vals": ["copy", "scale", "add", "triad"] },
+              { "arg": "threads", "vals": ["1", "2"] },
+              { "arg": "array-mib", "vals": ["256"] },
+              { "arg": "cpu-node", "vals": ["none"] },
+              { "arg": "memory-node", "vals": ["none"] },
+              { "arg": "deadline", "vals": ["300"] }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "run-params": {
+    "num-samples": 1,
+    "test-order": "sample"
+  },
+  "tool-params": []
+}

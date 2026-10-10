@@ -1,0 +1,35 @@
+#!/bin/bash
+# -*- mode: sh; indent-tabs-mode: nil; sh-basic-offset: 4 -*-
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=bash
+
+exec > stream-client-stderrout.txt 2>&1
+
+. /usr/bin/stream-base || exit 1
+
+validate_label || exit_error "STREAM requires a valid RS_CS_LABEL" 1
+validate_sw_prereqs python3 || exit_error "STREAM requires Python 3" 1
+
+forward_signal() {
+    local signal_name="$1"
+    if [[ -n "${python_pid:-}" ]]; then
+        kill -s "${signal_name}" "${python_pid}" 2>/dev/null || true
+        wait "${python_pid}" || true
+    fi
+    exit_error "STREAM run interrupted by ${signal_name}" 1
+}
+
+trap 'forward_signal TERM' TERM
+trap 'forward_signal INT' INT
+
+python3 /usr/bin/stream-client.py "$@" &
+python_pid=$!
+wait "${python_pid}"
+rc=$?
+trap - TERM INT
+if [[ ${rc} -ne 0 ]]; then
+    message="STREAM run failed"
+    if [[ -s stream-error.txt ]]; then
+        message=$(cat stream-error.txt)
+    fi
+    exit_error "${message}" "${rc}"
+fi

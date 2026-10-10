@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# -*- mode: python; indent-tabs-mode: nil; python-indent-level: 4 -*-
+# vim: autoindent tabstop=4 shiftwidth=4 expandtab softtabstop=4 filetype=python
+
+"""Return the native workload watchdog duration; Rickshaw adds its padding."""
+
+import sys
+
+from stream_common import parse_cli
+
+
+def main(argv):
+    args = parse_cli(argv)
+    # One standard STREAM process runs all four native kernels sequentially.
+    print(args.deadline)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except ValueError as exc:
+        print("STREAM runtime error: %s" % exc, file=sys.stderr)
+        sys.exit(2)

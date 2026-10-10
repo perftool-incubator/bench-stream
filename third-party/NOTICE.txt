@@ -1,0 +1,10 @@
+McCalpin STREAM 5.10
+
+The integration builds the unmodified native source file
+`streams/stream_omp_5_10.c`, fetched from
+https://github.com/redhat-performance/streams-wrapper at commit
+`8932e7bfa6cf1c99360c10549887eeb1d457d27e`. The native source is separately
+licensed under the terms retained in `STREAM-5.10-LICENSE.txt`; the wrapper
+repository's license excludes that file. Workshop verifies the native source
+SHA-256 and installs generated executables, not the wrapper repository or its
+helpers.
