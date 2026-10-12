@@ -21,7 +21,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: 'This PR was opened from a fork. PRs must be opened from branches on the upstream repository so that CI workflows have access to required secrets and variables.\\n\\nPlease push your branch to this repository and open a new PR.\\n\\nClosing this PR automatically.'
+              body: 'This PR was opened from a fork. PRs must be opened from branches on the upstream repository so that CI workflows have access to required secrets and variables.\n\nPlease push your branch to this repository and open a new PR.\n\nClosing this PR automatically.'
             });
             await github.rest.pulls.update({
               owner: context.repo.owner,
