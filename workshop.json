@@ -6,7 +6,7 @@
   },
   "userenvs": [
     {
-      "name": "alma9",
+      "name": "default",
       "requirements": [
         "stream_build_tools",
         "stream_build_driver",

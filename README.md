@@ -2,26 +2,33 @@
 
 This subproject integrates the unmodified McCalpin STREAM 5.10 OpenMP C
 program. Workshop fetches a pinned source archive, checks the native C file's
-SHA-256, and builds fixed-size executables. The initial Workshop target is the
-`alma9` userenv on x86_64.
+SHA-256, and builds fixed-size executables. Its requirements are declared under
+the `default` userenv entry, which Workshop uses as a fallback across
+x86_64 userenvs without a more specific entry.
 
 Initial support is ordinary STREAM with separate optional NUMA CPU and memory
 placement controls. The separate AMD STREAM Dynamic workload remains deferred
 until its source-only licensing scope is resolved.
 
-Validated Crucible coverage so far is limited to the `alma9` x86_64 userenv.
-The recovered baseline passed 16 native samples across all four kernels and
-one/two threads; a separate four-sample run observed explicit memory binding
+The recovered `alma9` baseline passed 16 native samples across all four kernels
+and one/two threads; a separate four-sample run observed explicit memory binding
 to NUMA node 0 and node 1. The two-client run also passed native validation,
 stock indexing, and ordinary summary checks. A separate deployed run also
 passed native validation, indexing, and one-sample summary checks at 1024 and
 2048 MiB per array. Its standard deviation is null because each size had one
-sample. The fresh Workshop run acquired source and compiled all four prepared
-variants at stage 7, while stages 1–6 were cached, so this does not establish a
-fully uncached installation. The concurrent summary is period-weighted and
-does not establish instantaneous combined bandwidth. These results do not
-qualify other userenvs or architectures, establish STREAM Run Rule
-conformance, or support comparative performance claims. See
+sample. That fresh Workshop run acquired source and compiled all four prepared
+variants at stage 7, while stages 1–6 were cached. The later userenv smoke
+matrix also completed fully uncached seven-stage image builds for `alma10`,
+`fedora43`, `rhubi10`, and `stream9`. The concurrent summary is period-weighted
+and does not establish instantaneous combined bandwidth. A later one-sample
+`default`-Workshop smoke matrix completed on 8 of 10 selected x86_64 userenvs;
+`alma8` and `rhubi8` failed during image building because their Python 3.6
+runtime rejects the STREAM build script's `subprocess.check_output(...,
+text=True)` call.
+This matrix checks basic build and execution compatibility, not performance
+qualification. Remaining untested userenvs, other architectures, and other
+topologies remain unqualified; these results do not establish STREAM Run Rule
+conformance or support comparative performance claims. See
 [VALIDATION.md](VALIDATION.md) for run identities and evidence limits.
 
 ## Workload and test types

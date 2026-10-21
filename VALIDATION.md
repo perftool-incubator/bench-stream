@@ -4,6 +4,37 @@ Validation included the local x86_64 development host and a separate build in
 the cached Crucible `alma9` userenv. The local compiler was GCC 15.2.1 (Red Hat
 15.2.1-7); parent-run target-userenv build evidence is described below.
 
+## Default Workshop userenv smoke matrix
+
+After moving the benchmark requirements to Workshop's `default` entry, ran one
+256 MiB Triad sample for each of the 10 upstream x86_64 userenv files not
+excluded by `userenvs/ci-excludes.txt`. The sequential runs used the `remotehosts`
+endpoint, one client, one thread, and no tools. Symlink aliases were omitted;
+their target files (`alma10`, `fedora44`, `rhubi10`, and `stream10`) were tested.
+
+Eight userenvs built and completed a sample:
+
+| Userenv | Run ID | Triad (MB/s) |
+|---|---|---:|
+| `alma10` | `5492b043-c3a4-46dd-a894-144ab71fe7d2` | 9284.2 |
+| `alma9` | `d3ed9a4f-bc04-4ed6-8f82-fde60e9521a0` | 12755.9 |
+| `fedora43` | `27371861-9a0b-483e-aee9-e56cc47f71e8` | 9352.0 |
+| `fedora44` | `f4ea73c7-2acd-411b-9b13-0ce8335e44cb` | 9292.1 |
+| `rhubi10` | `b54de3e6-f498-4973-9f51-4e9f5cdbe063` | 13282.8 |
+| `rhubi9` | `3874fdd4-270b-40aa-8771-7d67fc82855d` | 9229.9 |
+| `stream10` | `224b83d1-89ea-4dde-bbd0-65b46ec7a9d1` | 13285.0 |
+| `stream9` | `c575b2fa-b9cb-40f5-b3d0-1597ece9f170` | 11907.2 |
+
+`alma8` and `rhubi8` failed during the Workshop image build, before remote
+deployment. Both failures reached `stream-build.py` under Python 3.6 and raised
+`TypeError: __init__() got an unexpected keyword argument 'text'` from
+the script's `subprocess.check_output(..., text=True)` call, which forwards the
+keyword through `subprocess.run` to Python 3.6's `Popen`. This identifies a
+Python-version incompatibility in the STREAM build script for those userenvs;
+it is not a benchmark execution failure. The smoke samples establish basic
+build and run compatibility for the eight passing userenvs only. They are not
+performance qualification.
+
 ## Build and native adapter
 
 - Built all four production variants from the pinned, unmodified STREAM 5.10 C
@@ -187,11 +218,14 @@ Machine-readable review records are in the coordinating checkout's
   cleanup, and signal-during-publication behavior were checked with focused
   local adapter fixtures only; those checks do not establish full harness
   abort acceptance.
-- The deployed baseline and explicit-NUMA run exercised only Crucible
-  `alma9` on x86_64 and one host's topology. Other userenvs, architectures, and
-  topologies remain unqualified. The fresh Workshop run had cached stages
-  1–6, so a fully uncached Workshop install has not been demonstrated. No
-  cold-cache or isolated base performance run has been made.
+- The deployed performance baseline and explicit-NUMA run exercised Crucible
+  `alma9` on x86_64 and one host's topology. The smoke matrix above completed
+  one sample on seven other userenvs, but does not qualify them for performance
+  claims. It also found image-build failures on `alma8` and `rhubi8`. Fully
+  uncached seven-stage Workshop image builds completed for `alma10`,
+  `fedora43`, `rhubi10`, and `stream9`; no cold-cache or isolated base
+  performance run has been made. Other userenvs, architectures, and topologies
+  remain unqualified.
 - The large-array run has one sample per size, so it does not establish
   repeated-sample behavior for 1024 or 2048 MiB arrays. Native best-rate scores
   have no absolute per-kernel timestamps.
