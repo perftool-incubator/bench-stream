@@ -45,14 +45,16 @@ program runs and validates all four kernels sequentially on every invocation;
 kernels. Preserve all raw native output and validation results.
 
 Keep Workshop build inputs separate from runtime parameters. The build
-requirements use the `default` userenv entry, which is the fallback across
-x86_64 userenvs without a more specific entry. Workshop builds the four
-prepared standard variants at 256, 512, 1024, and 2048 MiB per array with fixed
-`NTIMES=100` and `-O3 -fopenmp -mcmodel=medium -m64`. Record source, compiler,
-flags, binary and license provenance. Build and install dependencies and
-executables during Workshop preparation; never download or compile at
-benchmark runtime. Compile and validate every declared prepared size on its
-target build environment.
+requirements use the `default` userenv entry as the fallback across x86_64
+userenvs without a specific entry. Alma8 and RHUBI8 share an explicit Workshop
+entry that activates Python 3.12 as `python3` and installs the engine's Python
+dependencies for that interpreter before building STREAM. Other userenvs keep
+the default requirements. Workshop builds the four prepared standard variants
+at 256, 512, 1024, and 2048 MiB per array with fixed `NTIMES=100` and
+`-O3 -fopenmp -mcmodel=medium -m64`. Record source, compiler, flags, binary and
+license provenance. Build and install dependencies and executables during
+Workshop preparation; never download or compile at benchmark runtime. Compile
+and validate every declared prepared size on its target build environment.
 
 Keep CPU and memory placement as separate optional runtime controls. CPU-node
 selection must use live topology intersected with the process's effective CPU
