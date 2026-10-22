@@ -29,7 +29,7 @@ from stream_common import (
 
 COMPILER = "gcc"
 def run(command):
-    print("$ " + shlex.join([str(part) for part in command]), flush=True)
+    print("$ " + " ".join(shlex.quote(str(part)) for part in command), flush=True)
     subprocess.run(command, check=True)
 
 
@@ -87,9 +87,11 @@ def main(argv):
     if shutil.which(COMPILER) is None:
         raise RuntimeError("Workshop build requires %s" % COMPILER)
 
-    compiler_version = subprocess.check_output([COMPILER, "--version"], text=True).splitlines()[0]
+    compiler_version = subprocess.check_output(
+        [COMPILER, "--version"], universal_newlines=True
+    ).splitlines()[0]
     compiler_release = subprocess.check_output(
-        [COMPILER, "-dumpfullversion", "-dumpversion"], text=True
+        [COMPILER, "-dumpfullversion", "-dumpversion"], universal_newlines=True
     ).strip()
     install_dir = Path(args.install_dir)
     install_dir.mkdir(parents=True, exist_ok=True)

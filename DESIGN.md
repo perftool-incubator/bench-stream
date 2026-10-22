@@ -50,11 +50,11 @@ result for multi-client comparisons.
 
 Multiplex exposes runtime controls only for values that the installed
 executables support. `test-type`, `threads`, `array-mib`, `cpu-node`,
-`memory-node`, and `deadline` are exposed. Initial deployment
-support is constrained to the Crucible `alma9` userenv on x86_64; other
-operating systems and architectures need a separate Workshop build and
-validation. Standard STREAM array
-size and `NTIMES` are build-time dimensions; the adapter selects exact
+`memory-node`, and `deadline` are exposed. Workshop build requirements use the
+`default` userenv entry as a fallback across x86_64 userenvs without a more
+specific entry. Each target build environment still needs validation; other
+architectures need a separate Workshop build and validation. Standard STREAM
+array size and `NTIMES` are build-time dimensions; the adapter selects exact
 installed manifest variants and cannot compile or resize a native executable
 at run time. Prepared sizes are 256, 512, 1024, and 2048
 MiB per array, with fixed `NTIMES=100`. Workshop uses the reviewed flags

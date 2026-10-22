@@ -39,6 +39,27 @@ ACTIVE_PROCESS = None
 SIGNAL_RECEIVED = None
 
 
+def _epoch_time_ns():
+    time_ns = getattr(time, "time_ns", None)
+    if time_ns is not None:
+        return time_ns()
+    return int(time.time() * 1_000_000_000)
+
+
+def _monotonic_time_ns():
+    monotonic_ns = getattr(time, "monotonic_ns", None)
+    if monotonic_ns is not None:
+        return monotonic_ns()
+    return int(time.monotonic() * 1_000_000_000)
+
+
+def _unlink_if_exists(path):
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
 class RunInterrupted(Exception):
     """Raised when Crucible asks the adapter process to stop."""
 
@@ -627,8 +648,8 @@ def prepare_launch(args, binary):
 def run_native(command, environment, deadline):
     global ACTIVE_PROCESS
     raise_if_interrupted()
-    start_epoch_ns = time.time_ns()
-    start_monotonic_ns = time.monotonic_ns()
+    start_epoch_ns = _epoch_time_ns()
+    start_monotonic_ns = _monotonic_time_ns()
     timed_out = False
     interrupted = False
     with OUTPUT_PATH.open("wb") as output:
@@ -663,8 +684,8 @@ def run_native(command, environment, deadline):
             if process.poll() is None:
                 terminate_process_group(process)
             ACTIVE_PROCESS = None
-    completion_epoch_ns = time.time_ns()
-    completion_monotonic_ns = time.monotonic_ns()
+    completion_epoch_ns = _epoch_time_ns()
+    completion_monotonic_ns = _monotonic_time_ns()
     return {
         "command": command,
         "launch_begin_epoch_ns": start_epoch_ns,
@@ -710,7 +731,7 @@ def main(argv):
     manifest = manifest_base()
     try:
         for artifact in (OUTPUT_PATH, MANIFEST_PATH, ERROR_PATH):
-            artifact.unlink(missing_ok=True)
+            _unlink_if_exists(artifact)
         args = parse_cli(argv)
         manifest["requested"] = effective_parameters(args)
         binary, provenance, build_manifest = load_variant(args.array_mib)

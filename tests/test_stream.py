@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
@@ -28,6 +29,7 @@ def load_module(name, filename):
 
 
 CLIENT = load_module("stream_client", "stream-client.py")
+BUILD = load_module("stream_build", "stream-build.py")
 POST = load_module("stream_post_process", "stream-post-process.py")
 NATIVE_OUTPUT = (FIXTURES / "stream-output-success.txt").read_text(encoding="utf-8")
 VALID_CLI = [
@@ -86,6 +88,91 @@ def make_valid_manifest(output=NATIVE_OUTPUT):
             "selection_effect": "reports the selected rate; it does not suppress other native kernels",
         },
     }
+
+
+@contextmanager
+def without_attribute(target, name):
+    missing = object()
+    value = getattr(target, name, missing)
+    if value is not missing:
+        delattr(target, name)
+    try:
+        yield
+    finally:
+        if value is not missing:
+            setattr(target, name, value)
+
+
+class PythonCompatibilityTests(unittest.TestCase):
+    def test_builder_logs_shell_quoted_command_and_preserves_argv(self):
+        command = ["gcc", "-DVALUE=a b", ";$(touch /tmp/stream-test-must-not-run)"]
+        with patch.object(BUILD.subprocess, "run") as subprocess_run, patch(
+            "builtins.print"
+        ) as print_output:
+            BUILD.run(command)
+
+        subprocess_run.assert_called_once_with(command, check=True)
+        self.assertIs(subprocess_run.call_args[0][0], command)
+        self.assertEqual(
+            print_output.call_args[0][0],
+            "$ gcc '-DVALUE=a b' ';$(touch /tmp/stream-test-must-not-run)'",
+        )
+        self.assertEqual(print_output.call_args[1], {"flush": True})
+
+    def test_epoch_nanoseconds_prefers_native_time_ns(self):
+        with patch.object(
+            CLIENT.time, "time_ns", return_value=12_345_678_901, create=True
+        ) as time_ns, patch.object(
+            CLIENT.time, "time", side_effect=AssertionError("fallback used")
+        ):
+            self.assertEqual(CLIENT._epoch_time_ns(), 12_345_678_901)
+        time_ns.assert_called_once_with()
+
+    def test_epoch_nanoseconds_fall_back_when_time_ns_is_unavailable(self):
+        with without_attribute(CLIENT.time, "time_ns"), patch.object(
+            CLIENT.time, "time", return_value=12.5
+        ) as time_seconds:
+            self.assertFalse(hasattr(CLIENT.time, "time_ns"))
+            self.assertEqual(CLIENT._epoch_time_ns(), 12_500_000_000)
+        time_seconds.assert_called_once_with()
+
+    def test_monotonic_nanoseconds_prefers_native_monotonic_ns(self):
+        with patch.object(
+            CLIENT.time, "monotonic_ns", return_value=3_456_789_012, create=True
+        ) as monotonic_ns, patch.object(
+            CLIENT.time, "monotonic", side_effect=AssertionError("fallback used")
+        ):
+            self.assertEqual(CLIENT._monotonic_time_ns(), 3_456_789_012)
+        monotonic_ns.assert_called_once_with()
+
+    def test_monotonic_nanoseconds_fall_back_when_monotonic_ns_is_unavailable(self):
+        with without_attribute(CLIENT.time, "monotonic_ns"), patch.object(
+            CLIENT.time, "monotonic", return_value=3.25
+        ) as monotonic_seconds:
+            self.assertFalse(hasattr(CLIENT.time, "monotonic_ns"))
+            self.assertEqual(CLIENT._monotonic_time_ns(), 3_250_000_000)
+        monotonic_seconds.assert_called_once_with()
+
+    def test_missing_ok_unlink_removes_existing_file(self):
+        with tempfile.TemporaryDirectory(prefix="stream-unlink-test-") as temporary:
+            artifact = Path(temporary) / "artifact.json"
+            artifact.write_text("stale", encoding="utf-8")
+
+            CLIENT._unlink_if_exists(artifact)
+
+            self.assertFalse(artifact.exists())
+
+    def test_missing_ok_unlink_ignores_missing_file(self):
+        with tempfile.TemporaryDirectory(prefix="stream-unlink-test-") as temporary:
+            artifact = Path(temporary) / "missing.json"
+            CLIENT._unlink_if_exists(artifact)
+            self.assertFalse(artifact.exists())
+
+    def test_missing_ok_unlink_propagates_permission_error(self):
+        artifact = Path("denied.json")
+        with patch.object(Path, "unlink", side_effect=PermissionError("denied")):
+            with self.assertRaisesRegex(PermissionError, "denied"):
+                CLIENT._unlink_if_exists(artifact)
 
 
 class RuntimeParameterTests(unittest.TestCase):

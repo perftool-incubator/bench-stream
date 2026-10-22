@@ -44,9 +44,10 @@ program runs and validates all four kernels sequentially on every invocation;
 `test-type` selects the reported primary metric and does not suppress other
 kernels. Preserve all raw native output and validation results.
 
-Keep Workshop build inputs separate from runtime parameters. The current
-Workshop target is Crucible `alma9` on x86_64. It builds the four prepared
-standard variants at 256, 512, 1024, and 2048 MiB per array with fixed
+Keep Workshop build inputs separate from runtime parameters. The build
+requirements use the `default` userenv entry, which is the fallback across
+x86_64 userenvs without a more specific entry. Workshop builds the four
+prepared standard variants at 256, 512, 1024, and 2048 MiB per array with fixed
 `NTIMES=100` and `-O3 -fopenmp -mcmodel=medium -m64`. Record source, compiler,
 flags, binary and license provenance. Build and install dependencies and
 executables during Workshop preparation; never download or compile at
