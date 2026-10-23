@@ -2,27 +2,36 @@
 
 This subproject integrates the unmodified McCalpin STREAM 5.10 OpenMP C
 program. Workshop fetches a pinned source archive, checks the native C file's
-SHA-256, and builds fixed-size executables. The initial Workshop target is the
-`alma9` userenv on x86_64.
+SHA-256, and builds fixed-size executables. Its requirements are declared under
+the `default` userenv entry, which Workshop uses as a fallback across
+x86_64 userenvs without a more specific entry.
 
 Initial support is ordinary STREAM with separate optional NUMA CPU and memory
 placement controls. The separate AMD STREAM Dynamic workload remains deferred
 until its source-only licensing scope is resolved.
 
-Validated Crucible coverage so far is limited to the `alma9` x86_64 userenv.
-The recovered baseline passed 16 native samples across all four kernels and
-one/two threads; a separate four-sample run observed explicit memory binding
+The recovered `alma9` baseline passed 16 native samples across all four kernels
+and one/two threads; a separate four-sample run observed explicit memory binding
 to NUMA node 0 and node 1. The two-client run also passed native validation,
 stock indexing, and ordinary summary checks. A separate deployed run also
 passed native validation, indexing, and one-sample summary checks at 1024 and
 2048 MiB per array. Its standard deviation is null because each size had one
-sample. The fresh Workshop run acquired source and compiled all four prepared
-variants at stage 7, while stages 1–6 were cached, so this does not establish a
-fully uncached installation. The concurrent summary is period-weighted and
-does not establish instantaneous combined bandwidth. These results do not
-qualify other userenvs or architectures, establish STREAM Run Rule
-conformance, or support comparative performance claims. See
-[VALIDATION.md](VALIDATION.md) for run identities and evidence limits.
+sample. That fresh Workshop run acquired source and compiled all four prepared
+variants at stage 7, while stages 1–6 were cached. The later userenv smoke
+matrix also completed fully uncached seven-stage image builds for `alma10`,
+`fedora43`, `rhubi10`, and `stream9`. The concurrent summary is period-weighted
+and does not establish instantaneous combined bandwidth. The post-compatibility
+one-sample `default`-Workshop smoke matrix completed on 8 of 10 selected x86_64
+userenvs, including all eight that passed before. `alma8` and `rhubi8` now pass
+the Workshop build and endpoint deployment, but both time out at remote engine
+initialization before the benchmark client starts. This does not verify the
+client's Python 3.6 clock and file-removal fallbacks on those two userenvs; the
+focused local tests cover those fallback paths. The matrix checks basic build
+and execution compatibility, not performance qualification.
+Other architectures and topologies remain unqualified; these results do not
+establish STREAM Run Rule conformance or support comparative performance
+claims. See [VALIDATION.md](VALIDATION.md) for run identities and evidence
+limits.
 
 ## Workload and test types
 
@@ -159,7 +168,8 @@ the third-party notice are copied beside the built executables in Workshop.
 
 - `rickshaw.json`: engine files, runtime estimate, and controller postprocessor.
 - `multiplex.json`: test-type, thread, prepared array, NUMA, and deadline values.
-- `workshop.json`: pinned source and Workshop build tools for `alma9`.
+- `workshop.json`: pinned source and Workshop build requirements under the
+  `default` x86_64 userenv fallback.
 - `stream-build.py`: source-verifying fixed-variant builder.
 - `stream-client.py` and `stream_common.py`: runtime launcher and native output validator.
 - `stream-post-process.py`: raw-output/manifest revalidation and selected CDM metric.

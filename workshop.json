@@ -1,15 +1,27 @@
 {
   "workshop": {
     "schema": {
-      "version": "2020.03.02"
+      "version": "2025.07.25"
     }
   },
   "userenvs": [
     {
-      "name": "alma9",
+      "name": "default",
       "requirements": [
         "stream_build_tools",
         "stream_build_driver",
+        "stream_upstream"
+      ]
+    },
+    {
+      "name": [
+        "alma8",
+        "rhubi8"
+      ],
+      "requirements": [
+        "stream_build_tools",
+        "stream_build_driver",
+        "stream_python312_default",
         "stream_upstream"
       ]
     }
@@ -52,6 +64,17 @@
             "src": "%bench-dir%/LICENSE",
             "dst": "/tmp/STREAM-ADAPTER-LICENSE.txt"
           }
+        ]
+      }
+    },
+    {
+      "name": "stream_python312_default",
+      "type": "manual",
+      "manual_info": {
+        "commands": [
+          "alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 312",
+          "alternatives --set python3 /usr/bin/python3.12",
+          "python3 -m pip install fabric invoke redis hiredis jsonschema"
         ]
       }
     },
