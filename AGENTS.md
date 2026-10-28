@@ -124,3 +124,11 @@ out of publishable files. For SSH work, including QUADS, reuse the user's existi
 public key at `~/.ssh/id_ed25519` and `~/.ssh/id_ed25519.pub`. If either file
 is missing, report that; do not generate a replacement or service-specific
 identity.
+
+## CI gate
+
+The `.github/workflows/crucible-ci.yaml` workflow runs unit tests before the
+registered `stream` benchmark CI on non-fork code changes and manual
+dispatches; docs-only pull requests use faux CI. Keep the callable unit test
+command in `.github/workflows/unittest.yaml` aligned with
+`python3 -m unittest discover -s tests -v`.
