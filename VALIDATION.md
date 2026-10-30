@@ -64,6 +64,46 @@ both native and fallback clock paths plus missing-file removal behavior. A
 successful runtime sample on Alma8 and RHUI8 remains unverified because engine
 initialization timed out before either client launched.
 
+## EL8 shared-default Workshop experiment (2026-10-30)
+
+Removed `python3` from `stream_build_tools`, removed the explicit `alma8` and
+`rhubi8` userenv override, and removed `stream_python312_default`. Both
+userenvs then resolved the shared `default` profile. Standalone Workshop builds
+used the target userenv plus Toolbox dependency, Roadblock, Rickshaw engine,
+and STREAM requirements, with `--skip-update true`.
+
+The build command for Alma8 was:
+
+```bash
+crucible wrapper python3 /opt/crucible/subprojects/core/workshop/workshop.py \
+  --label bench-stream-experiment --skip-update true \
+  --userenv /opt/crucible/subprojects/core/rickshaw/userenvs/alma8.json \
+  --requirements /opt/crucible/subprojects/core/toolbox/workshop.json \
+  --requirements /opt/crucible/subprojects/core/roadblock/workshop.json \
+  --requirements /opt/crucible/subprojects/core/rickshaw/engine/workshop.json \
+  --requirements /opt/crucible/subprojects/benchmarks/stream/workshop.json \
+  --param %bench-dir%=/opt/crucible/subprojects/benchmarks/stream \
+  --param %engine-dir%=/opt/crucible/subprojects/core/rickshaw/engine \
+  --param %rickshaw-dir%=/opt/crucible/subprojects/core/rickshaw
+```
+
+The RHUI8 build used the same command with `rhubi8.json` as the userenv file.
+Both builds exited successfully:
+
+| Userenv | Result | Local image ID | Image digest | Duration |
+|---|---|---|---|---:|
+| `alma8` | Engine Python dependencies and STREAM source build passed | `e05138ef0e9b` | `sha256:57e4b78f0a9d25ab7e015c4cd97678dac19f19984578a8e044e4c4fb2c5dd43d` | 5m 48s |
+| `rhubi8` | Engine Python dependencies and STREAM source build passed | `4c04dd79aab8` | `sha256:15250cd7cf3385f63e608d18678ebeda7f6854ab54b647b15435e2511d1c7af5` | 11m 36s |
+
+Each log shows `stream_build_tools` installing `gcc`, `numactl`, and `tar`
+without `python3`; the default engine Python pip requirements succeeded, and
+`python3 /tmp/stream-build.py` completed successfully, compiling all four
+declared STREAM variants. These builds did not include the SIS-generated
+Toolbox-files requirement or container entrypoint configuration, and did not
+initialize an endpoint or launch a native workload. They show that the EL8
+Workshop profile override is unnecessary for the standalone build path; the
+deployed-runtime result remains unverified with this configuration.
+
 Local post-compatibility checks passed: all 31 tests from
 `python3 -m unittest discover -s tests -v`, Python compilation for the adapter
 scripts and tests, `bash -n stream-client`, and direct installed-schema checks

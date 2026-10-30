@@ -46,10 +46,11 @@ kernels. Preserve all raw native output and validation results.
 
 Keep Workshop build inputs separate from runtime parameters. The build
 requirements use the `default` userenv entry as the fallback across x86_64
-userenvs without a specific entry. Alma8 and RHUBI8 share an explicit Workshop
-entry that activates Python 3.12 as `python3` and installs the engine's Python
-dependencies for that interpreter before building STREAM. Other userenvs keep
-the default requirements. Workshop builds the four prepared standard variants
+userenvs without a specific entry. Alma8 and RHUBI8 also use this shared entry:
+local Workshop builds passed for both after removing the `python3` distro
+package and their explicit Python 3.12 override. Treat that as image-build
+evidence only; endpoint initialization and native runs still require separate
+verification. Workshop builds the four prepared standard variants
 at 256, 512, 1024, and 2048 MiB per array with fixed `NTIMES=100` and
 `-O3 -fopenmp -mcmodel=medium -m64`. Record source, compiler, flags, binary and
 license provenance. Build and install dependencies and executables during
