@@ -33,6 +33,12 @@ establish STREAM Run Rule conformance or support comparative performance
 claims. See [VALIDATION.md](VALIDATION.md) for run identities and evidence
 limits.
 
+On 2026-10-30, local Workshop builds for `alma8` and `rhubi8` passed with the
+shared `default` profile after removing the `python3` distro package and the
+EL8-specific Python override. This confirms image-build compatibility; it does
+not establish endpoint initialization or a native run with that profile. See
+[VALIDATION.md](VALIDATION.md) for build details.
+
 ## Workload and test types
 
 Each native invocation runs Copy, Scale, Add, and Triad sequentially and
